@@ -15,91 +15,79 @@
     </div>
     <script>
         // ==========CREATE==========
-        var plusy = 0, score = 0, hsc = 0;
-        var p11 = document.getElementById('p11'), p12 = document.getElementById('p12'),
-            ph11 = document.getElementById('ph11'), ph12 = document.getElementById('ph12'),
-            p21 = document.getElementById('p21'), p22 = document.getElementById('p22'),
-            ph21 = document.getElementById('ph21'), ph22 = document.getElementById('ph22');
-            b = document.getElementById('bird');
-        p11.style.height = Math.floor(Math.random()*280+80) + 'px';
-        p12.style.height = 640-p11.offsetHeight-200 + 'px';
-        ph11.style.top = p11.offsetHeight + 'px';
-        ph12.style.bottom = 640 - p12.offsetTop + 'px';
-        p21.style.height = Math.floor(Math.random()*280+80) + 'px';
-        p22.style.height = 640-p21.offsetHeight-200 + 'px';
-        ph21.style.top = p21.offsetHeight + 'px';
-        ph22.style.bottom = 640 - p22.offsetTop + 'px';
-        var tm = setInterval('main()',50);
-
+        var plusy = 0,
+          score = 0,
+          hsc = 0;
+        var p1 = document.getElementById('p1'),
+          p2 = document.getElementById('p2'),
+          ph1 = document.getElementById('ph1'),
+          ph2 = document.getElementById('ph2'),
+          b = document.getElementById('bird');
+        p1.style.height = Math.floor(Math.random() * 280 + 80) + 'px';
+        p2.style.height = 640 - p1.offsetHeight - 200 + 'px';
+        ph1.style.top = p1.offsetHeight + 'px';
+        ph2.style.bottom = 640 - p2.offsetTop + 'px';
+        var tm = setInterval('main()', 50);
 
         // ==========STEP==========
         function main() {
-            // Colliding pipes||ground
-            if ( b.offsetTop>=620 || b.offsetTop<0
-                || (b.offsetTop<ph11.offsetTop+ph11.offsetHeight && ((b.offsetLeft+b.offsetWidth>p11.offsetLeft && b.offsetLeft+b.offsetWidth<p11.offsetLeft+p11.offsetWidth) || (b.offsetLeft>p11.offsetLeft && b.offsetLeft<p11.offsetLeft+p11.offsetWidth)))
-                || (b.offsetTop+b.offsetHeight>ph12.offsetTop && ((b.offsetLeft+b.offsetWidth>p12.offsetLeft && b.offsetLeft+b.offsetWidth<p12.offsetLeft+p12.offsetWidth) || (b.offsetLeft>p12.offsetLeft && b.offsetLeft<p12.offsetLeft+p12.offsetWidth)))
-                || (b.offsetTop<ph21.offsetTop+ph21.offsetHeight && ((b.offsetLeft+b.offsetWidth>p21.offsetLeft && b.offsetLeft+b.offsetWidth<p21.offsetLeft+p21.offsetWidth) || (b.offsetLeft>p21.offsetLeft && b.offsetLeft<p21.offsetLeft+p21.offsetWidth)))
-                || (b.offsetTop+b.offsetHeight>ph22.offsetTop && ((b.offsetLeft+b.offsetWidth>p22.offsetLeft && b.offsetLeft+b.offsetWidth<p22.offsetLeft+p22.offsetWidth) || (b.offsetLeft>p22.offsetLeft && b.offsetLeft<p22.offsetLeft+p22.offsetWidth))) ) {
-                plusy = 0; score = 0; document.getElementById('sc').innerHTML = score + '|' + hsc;
-                b.style.top = '240px';
-                p11.style.left = '480px'; p12.style.left = '480px';
-                p11.style.height = Math.floor(Math.random()*280+80) + 'px';
-                p12.style.height = 640-p11.offsetHeight-200 + 'px';
-                ph11.style.top = p11.offsetHeight + 'px';
-                ph12.style.bottom = 640 - p12.offsetTop + 'px';
-                ph11.style.left = '479px'; ph12.style.left = '479px';
-                p21.style.left = '760px'; p22.style.left = '760px';
-                p21.style.height = Math.floor(Math.random()*280+80) + 'px';
-                p22.style.height = 640-p21.offsetHeight-200 + 'px';
-                ph21.style.top = p21.offsetHeight + 'px';
-                ph22.style.bottom = 640 - p22.offsetTop + 'px';
-                ph21.style.left = '759px'; ph22.style.left = '759px';
-            }
+          // Colliding pipes||ground
+          if (b.offsetTop >= 620 || b.offsetTop < 0 ||
+            (b.offsetTop < ph1.offsetTop + ph1.offsetHeight && ((b.offsetLeft + b.offsetWidth > p1.offsetLeft && b.offsetLeft + b.offsetWidth < p1.offsetLeft + p1.offsetWidth) || (b.offsetLeft > p1.offsetLeft && b.offsetLeft < p1.offsetLeft + p1.offsetWidth))) ||
+            (b.offsetTop + b.offsetHeight > ph2.offsetTop && ((b.offsetLeft + b.offsetWidth > p2.offsetLeft && b.offsetLeft + b.offsetWidth < p2.offsetLeft + p2.offsetWidth) || (b.offsetLeft > p2.offsetLeft && b.offsetLeft < p2.offsetLeft + p2.offsetWidth)))) {
+            plusy = 0; score = 0;
+            document.getElementById('sc').innerHTML = score + ':' + hsc;
+            b.style.top = '240px';
+            p1.style.left = '480px';
+            p2.style.left = '480px';
+            p1.style.height = Math.floor(Math.random() * 280 + 80) + 'px';
+            p2.style.height = 640 - p1.offsetHeight - 200 + 'px';
+            ph1.style.top = p1.offsetHeight + 'px';
+            ph2.style.bottom = 640 - p2.offsetTop + 'px';
+            ph1.style.left = '479px';
+            ph2.style.left = '479px';
+          }
 
-            // Move bird, pipes
-            plusy+=1.5; $('#bird').css({top: '+=' + plusy + 'px'});
-            document.getElementById('bird').style.transform = 'rotate(' + plusy*2 + 'deg)';
-            if (plusy < -10) $('#bird').attr('src', 'pages/bird/bird2.png'); else $('#bird').attr('src', 'pages/bird/bird.png');
-            $('#p11').css({left: '-=6px'}); $('#p12').css({left: '-=6px'});
-            $('#ph11').css({left: '-=6px'}); $('#ph12').css({left: '-=6px'});
-            $('#p21').css({left: '-=6px'}); $('#p22').css({left: '-=6px'});
-            $('#ph21').css({left: '-=6px'}); $('#ph22').css({left: '-=6px'});
+          // Move bird, pipes
+          plusy += 3;
+          b.style.top = b.offsetTop+plusy + 'px';
+          b.style.transform = 'rotate(' + Math.min(plusy*2, 90) + 'deg)';
+          if (plusy < -10) b.src = 'bird2.png';
+          else b.src = 'bird.png';
+          p1.style.left = p1.offsetLeft-8 + 'px';
+          p2.style.left = p2.offsetLeft-8 + 'px';
+          ph1.style.left = ph1.offsetLeft-8 + 'px';
+          ph2.style.left = ph2.offsetLeft-8 + 'px';
 
-            // If pipes go out of screen
-            if (p11.offsetLeft <= -80) {
-                score ++; document.getElementById('sc').innerHTML = score + '|' + hsc;
-                p11.style.left = '480px'; p12.style.left = '480px';
-                p11.style.height = Math.floor(Math.random()*280+80) + 'px';
-                p12.style.height = 640-p11.offsetHeight-200 + 'px';
-                ph11.style.top = p11.offsetHeight + 'px';
-                ph12.style.bottom = 640 - p12.offsetTop + 'px';
-                ph11.style.left = '479px';
-                ph12.style.left = '479px';
-            }
-            if (p21.offsetLeft <= -80) {
-                score ++; document.getElementById('sc').innerHTML = score + '|' + hsc;
-                p21.style.left = '480px'; p22.style.left = '480px';
-                p21.style.height = Math.floor(Math.random()*280+80) + 'px';
-                p22.style.height = 640-p21.offsetHeight-200 + 'px';
-                ph21.style.top = p21.offsetHeight + 'px';
-                ph22.style.bottom = 640 - p22.offsetTop + 'px';
-                ph21.style.left = '479px';
-                ph22.style.left = '479px';
-            }
+          // If pipes go out of screen
+          if (p1.offsetLeft <= -80) {
+            score++;
+            document.getElementById('sc').innerHTML = score + ':' + hsc;
+            p1.style.left = '480px';
+            p2.style.left = '480px';
+            p1.style.height = Math.floor(Math.random() * 280 + 80) + 'px';
+            p2.style.height = 640 - p1.offsetHeight - 200 + 'px';
+            ph1.style.top = p1.offsetHeight + 'px';
+            ph2.style.bottom = 640 - p2.offsetTop + 'px';
+            ph1.style.left = '479px';
+            ph2.style.left = '479px'
+          }
 
-            // Highscore check
-            if (score > hsc) {hsc = score; document.getElementById('sc').innerHTML = score + '|' + hsc;}
+          // Highscore check
+          if (score > hsc) {
+            hsc = score;
+            document.getElementById('sc').innerHTML = score + ':' + hsc
+          }
         }
 
-
         //  ==========LMB CLICK==========
-        $('#screen').click(function(){
-            plusy = -15;
-        });
+        document.getElementById('screen').onclick = function() {
+          plusy = -24
+        }
 
         //  ==========KEYPRESS==========
         document.onkeydown = function(e) {
-            if (e.keyCode == 38) plusy = -15;
+          if (e.keyCode == 38 || e.keyCode == 32) plusy = -24
         }
     </script>
 </body>
