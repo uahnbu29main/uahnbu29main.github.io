@@ -1,13 +1,24 @@
 <html>
+<head>
+    <style>
+        @font-face {font-family: FlappyBird; src: url(04B_19__.TTF)}
+    #screen {position: absolute; left: 0; top: 0; width: 480px; height: 640px; background: #a9e2f3; overflow: hidden}
+    #sc {position: absolute; left: 16px; top: 16px; font-family: FlappyBird; font-size: 48px; font-weight: bold; color: #fff; z-index: 1}
+    #bird {position: absolute; left: 64px; top: calc(50% - 24px); width: 50px; height: 36px; -ms-transform-origin: 30px 18px; -webkit-transform-origin: 30px 18px; transform-origin: 30px 18px}
+    #p1 {position: absolute; left: 480px; top: 0; width: 80px}
+    #p2 {position: absolute; left: 480px; bottom: 0; width: 80px}
+    #ph1 {position: absolute; width: 82px; height: 36px; left: 479px}
+    #ph2 {position: absolute; width: 82px; height: 36px; left: 479px}
+    </style>
+</head>
 <body>
-    <p id="ins" style="position:absolute; left:480px; top:0px; color:#7f8c8d;">HOW2PLAY: Press [up arrow] or Click the button on the upper right corner</p>
-    <div id="screen" style="position:absolute; left:0; top:0; width:480px; height:640px; background:#a9e2f3; overflow:hidden;">
-        <p id="sc" style="position:absolute; left:16px; top:16px; font-family:FlappyBird; font-size:48px; color:#fff; z-index:1;">0|0</p>
-        <img src="bird.png" alt="The bird" id="bird" style="position:absolute; left:64px; top:calc(50% - 24px); width:67px; height:48px; -ms-transform-origin:33px 24px; -webkit-transform-origin:33px 24px; transform-origin:33px 24px;">
-        <img src="pipe.png" alt="Pipe" id="p1" style="position:absolute; left:480px; top:0; width:80px;">
-        <img src="pipe.png" alt="Pipe" id="p2" style="position:absolute; left:480px; bottom:0; width:80px;">
-        <img src="pipeh.png" alt="Pipe" id="ph1" style="position:absolute; width:82px; height:36px; left:479px">
-        <img src="pipeh.png" alt="Pipe" id="ph2" style="position:absolute; width:82px; height:36px; left:479px">
+    <div id="screen">
+        <p id="sc">0|0</p>
+        <img src="bird.png" alt="The bird" id="bird">
+        <img src="pipe.png" alt="Pipe" id="p1">
+        <img src="pipe.png" alt="Pipe" id="p2">
+        <img src="pipeh.png" alt="Pipe" id="ph1">
+        <img src="pipeh.png" alt="Pipe" id="ph2">
     </div>
     <script>
         // ==========CREATE==========
