@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html>
+<body>
+<canvas width="1056" height="594"></canvas>
+<script>
+/***********
+ *  TOOLS  *
+ ***********/
+const room = document.querySelector`canvas`.getContext`2d`;
+const ranInt = (min,max) => Math.floor(Math.random() * (max-min+1)) + min;
+const getObj = (name,pos=0) => pos == -1 ? Object.values(room.objects[name]) : room.objects[name][pos];
+const RAD = Math.PI / 180;
+function addObj(name,x,y,width,height,sprite,spriteX=0,spriteY=0,pinX=0,pinY=0,framePerImage=1) {
+  if (typeof room.objects[name] == 'undefined') {room.objects[name] = []; }
+  room.objects[name].push({
+    x: x, y: y,
+    w: width, h: height,
+    pinX: pinX, pinY: pinY,
+    spr: sprite, faceLeft: false,
+    ang: 0,
+    sprX: spriteX, sprY: spriteY,
+    sprW: room.sprites[sprite].src.width / room.sprites[sprite].len / (room.sprites[sprite].reverse+1),
+    sprH: room.sprites[sprite].src.height,
+    FPI: framePerImage, frameCount: 0
+  });
+}
+function setVar(obj,arg1,arg2,arg3) {
+  if (typeof arg1 == 'number') {room.objects[obj][arg1][arg2] = arg3; }
+  else {room.objects[obj].forEach(e => e[arg1] = arg2); }
+}
+room.drawImageRotate = function(img,pinX,pinY,x,y,ang) {
+  room.translate(pinX,pinY);
+  room.rotate(ang * RAD);
+  room.drawImage(img,x,y); // x, y relative to pinX, pinY
+  room.rotate(-ang * RAD);
+  room.translate(-pinX, -pinY);
+};
+room.ctn = function (obj) {
+  var ang = obj.ang * RAD;
+  return [
+    obj.x + obj.pinX - obj.pinX*Math.cos(ang) + obj.pinY*Math.sin(ang)
+      - Math.max(obj.h*Math.sin(ang), 0) + Math.min(obj.w*Math.cos(ang), 0),
+    obj.y + obj.pinY - obj.pinY*Math.cos(ang) - obj.pinX*Math.sin(ang)
+      + Math.min(obj.w*Math.sin(ang), 0) + Math.min(obj.h*Math.cos(ang), 0),
+    obj.w*Math.abs(Math.cos(ang)) + obj.h*Math.abs(Math.sin(ang)),
+    obj.h*Math.abs(Math.cos(ang)) + obj.w*Math.abs(Math.sin(ang))
+  ];
+};
+room.reverse = function (obj) {
+  obj.faceLeft = !obj.faceLeft;
+  obj.sprX = obj.w - obj.sprW - obj.sprX;
+};
+room.shoot = function (from) {
+  if (from.spr % 2) {
+    from.spr--;
+    from.sprW = 76; from.sprH = 81;
+    from.sprX = 0 ; from.sprY = 0;
+    var sw = getObj('sword', -1).filter(e => e.x == -100)[0];
+    if (from.faceLeft) {
+      sw.x = from.x + from.w + 36 - sw.w;
+      sw.faceLeft = true;
+      sw.rspd = -10;
+    } else {
+      sw.x = from.x - 36;
+      sw.faceLeft = false;
+      sw.rspd = 10;
+    }
+    sw.y = from.y - 18;
+    sw.hspd = from.spd * Math.cos(from.arAng * RAD); sw.vspd = from.spd * Math.sin(from.arAng * RAD);
+    sw.prn = getObj('player', -1).indexOf(from) + 1;
+  }
+}
+
+/***********
+ *  SETUP  *
+ ***********/
+room.sprites = [];
+room.objects = [];
+room.load = {
+  sprites: [
+    ['p1walk'  , 2, true ], // 0
+    ['p1walksw', 2, true ], // 1
+    ['p2walk'  , 2, true ], // 2
+    ['p2walksw', 2, true ], // 3
+    ['sw'      , 1, true ], // 4
+    ['ar'      , 1, false], // 5
+    ['grass'   , 1, false], // 6
+    ['gr'      , 1, false], // 7
+    ['b1'      , 1, false], // 8
+    ['b2'      , 1, false], // 9
+    ['b3'      , 1, false]  // 10
+  ],
+  loaded:0
+};
+room.loadingBar = function (percent) {
+  room.beginPath();
+  room.fillStyle = '#f00';
+  room.fillRect(room.canvas.width/2 - 128, room.canvas.height/2 - 32, 256, 64);
+  room.fillStyle = '#fff';
+  room.fillRect(room.canvas.width/2 - 120, room.canvas.height/2 - 24, 240, 48);
+  room.fillStyle = '#f00';
+  room.fillRect(room.canvas.width/2 - 112, room.canvas.height/2 - 16, percent * 224, 32);
+}
+room.load.sprites.forEach(e => {
+  var img = new Image();
+  img.src = e[0] + '.png';
+  img.onload = () => {
+    room.load.loaded++;
+    room.loadingBar(room.load.loaded / room.load.sprites.length);
+    if (room.load.loaded == room.load.sprites.length) {room.setUp(); }
+  }
+  room.sprites.push({src:img, len:e[1], reverse:e[2]});
+});
+room.setUp = function() {
+  addObj('ground', 0, room.canvas.height - 64, room.canvas.width, 64, 7);
+  setVar('ground', 'sprW', room.canvas.width);
+  addObj('block', ranInt(0, room.canvas.width - 288), getObj`ground`.y - 360, 288, 360, 10);
+  addObj('block', ranInt(0, room.canvas.width/2 - 288), getObj`ground`.y - 216, 288, 216, 9);
+  addObj('block', ranInt(room.canvas.width/2, room.canvas.width - 288), getObj`ground`.y - 216, 288, 216, 9);
+  addObj('block', ranInt(0, room.canvas.width/2 - 288), getObj`ground`.y - 144, 288, 144, 8);
+  addObj('block', ranInt(room.canvas.width/2, room.canvas.width - 288), getObj`ground`.y - 144, 288, 144, 8);
+  addObj('player', 112, getObj`ground`.y - 81, 76, 81, 1, -36, -18);
+  addObj('player', room.canvas.width - 112 - 76, getObj`ground`.y - 81, 76, 81, 3, -36, -18);
+  room.reverse(getObj('player', 1));
+  setVar('player', 'FPI', 8);
+  setVar('player', 0, 'hspd', 5); setVar('player', 1, 'hspd', -5);
+  setVar('player', 'vspd', 0);
+  setVar('player', 'arAng', -90);
+  setVar('player', 'spd', 24);
+  setVar('player', 0, 'cw', false); setVar('player', 1, 'cw', true);
+  setVar('player', 'step', function() {
+    if (this.frameCount < this.FPI * room.sprites[this.spr].len - 1) {this.frameCount++; }
+    else {this.frameCount = 0; }
+    
+    for (var i = 0; i < Math.abs(this.hspd); i++) {
+      this.x += Math.sign(this.hspd);
+      if (this.x == 0 && this.hspd < 0 || this.x+this.w == room.canvas.width && this.hspd > 0) {
+        this.hspd /= -1;
+        room.reverse(this);
+      }
+    }
+    
+    var stop = false;
+    if (!this.vspd) {
+      var that = this;
+      getObj('block', -1).concat(getObj`ground`).forEach(function(e) {
+        if (e.y == that.y+that.h && that.x > e.x && that.x+that.w < e.x+e.w) {
+          that.vspd = 0;
+          stop = true;
+        }
+      });
+    } else {
+      if (this.vspd > 0) {
+        for (var i = 0; i < this.vspd; i++) {
+          var that = this;
+          getObj('block', -1).concat(getObj`ground`).forEach(function(e) {
+            if (e.y == that.y+that.h && that.x > e.x-that.w/2 && that.x+that.w/2 < e.x+e.w) {
+              that.vspd = 0;
+              stop = true;
+            }
+          });
+          if (stop) {break; } else {this.y++; }
+        }
+      } else {this.y += this.vspd; }
+    }
+    if (!stop) {this.vspd++; }
+    
+    if (this.cw) {
+      if (this.hspd > 0 && this.arAng < -5 || this.hspd < 0 && this.arAng < -60) {this.arAng += 4; }
+      else {this.cw = false; }
+    } else {
+      if (this.hspd > 0 && this.arAng > -120 || this.hspd < 0 && this.arAng > -175) {this.arAng -= 4; }
+      else {this.cw = true; }
+    }
+    
+    var that = this;
+    getObj('sword', -1).forEach(function (e) {
+      var otherX = room.ctn(e)[0], otherY = room.ctn(e)[1],
+        otherW = room.ctn(e)[2]  , otherH = room.ctn(e)[3];
+      if (that.x <= otherX+otherW && that.x+that.w >= otherX && that.y <= otherY+otherH && that.y+that.h >= otherY) {
+        if (!e.prn) {
+          if (!(that.spr%2)) {
+            that.spr++;
+            that.sprX = -36; that.sprY = -18;
+            that.sprW = 112; that.sprH = 99;
+            e.x = -100;
+          }
+        }
+        //if (e.prn != getObj('player', -1).indexOf(this)+1) gameOver();
+      }
+    });
+  });
+  addObj('sword', -100, 0, 36, 63, 4, 0, 0, 18, 31);
+  addObj('sword', -100, 0, 36, 63, 4, 0, 0, 18, 31);
+  setVar('sword', 'prn', 0);
+  setVar('sword', 'rspd', 0);
+  setVar('sword', 'step', function() {
+    if (this.prn) {
+      if (this.x < 0 && this.hspd < 0 || this.x+this.w > room.canvas.width && this.hspd > 0) {this.hspd /= -1}
+      else {this.x += this.hspd}
+      
+      var that = this, stop = false,
+        ctnX = room.ctn(this)[0], ctnY = room.ctn(this)[1],
+        ctnW = room.ctn(this)[2], ctnH = room.ctn(this)[3];
+      if (this.vspd > 0) {
+        for (var i = 0; i < this.vspd; i++) {
+          getObj('block', -1).concat(getObj`ground`).forEach(function(e) {
+            if (e.y > ctnY+ctnH && e.y <= ctnY+ctnH+1 && ctnX > e.x-ctnW/2 && ctnX+ctnW/2 < e.x+e.w) {
+              that.y = e.y - that.h;
+              that.hspd = 0; that.vspd = 0;
+              that.rspd = 0;
+              that.ang = 180;
+              that.prn = 0;
+              stop = true;
+            }
+          });
+          if (stop) {break; } else {this.y++; ctnY++; }
+        }
+        if (!stop) {this.vspd++; }
+      } else if (!this.vspd) {
+        if (this.rspd) {this.y += this.vspd++; }
+      } else {
+        this.y += this.vspd;
+        this.vspd++;
+      }
+      
+      this.ang += this.rspd;
+      getObj('block', -1).concat(getObj`ground`).forEach(function(e) {
+        if (e.y > ctnY+ctnH && e.y <= room.ctn(that)[1]+room.ctn(that)[3] && ctnX > e.x-ctnW/2 && ctnX+ctnW/2 < e.x+e.w) {
+          that.y = e.y - that.h;
+          that.hspd = 0; that.vspd = 0;
+          that.rspd = 0;
+          that.ang = 180;
+          that.prn = 0;
+        }
+      });
+    }
+  });
+  for (var i = 0; i < room.canvas.width; i += 54) {
+    if (Math.random() < .2) {addObj('grass', i, getObj`ground`.y - 32, 54, 32, 6); }
+  }
+  getObj('block', -1).forEach(function (e) {
+    if (Math.random() < .5) {addObj('grass', ranInt(e.x, e.x+e.width-54), e.y-32, 54, 32, 6); }
+  });
+  room.draw();
+}
+room.draw = function () {
+  room.beginPath();
+  room.fillStyle = '#434a4d';
+  room.fillRect(0, 0, room.canvas.width, room.canvas.height);
+  Object.values(room.objects).forEach(e => e.forEach(f => {if (f.spr >= 0) {
+    var imgW = room.sprites[f.spr].src.width / room.sprites[f.spr].len / (room.sprites[f.spr].reverse+1),
+      imgIdx = Math.floor(f.frameCount / f.FPI);
+    if (f.ang) {
+      room.translate(f.x+f.pinX, f.y+f.pinY);
+      room.rotate(f.ang * RAD);
+      room.drawImage(
+        room.sprites[f.spr].src,
+        imgW * imgIdx + (f.faceLeft ? room.sprites[f.spr].src.width/2 : 0), 0,
+        imgW, room.sprites[f.spr].src.height,
+        f.sprX-f.pinX, f.sprY-f.pinY,
+        f.sprW, f.sprH
+      );
+      room.rotate(-f.ang * RAD);
+      room.translate(-f.x-f.pinX, -f.y-f.pinY);
+    } else {
+      room.drawImage(
+        room.sprites[f.spr].src,
+        imgW * imgIdx + (f.faceLeft ? room.sprites[f.spr].src.width/2 : 0), 0,
+        imgW, room.sprites[f.spr].src.height,
+        f.x + f.sprX, f.y + f.sprY,
+        f.sprW, f.sprH
+      );
+    }
+  }}));
+}
+room.step = function () {
+  getObj('player', -1).forEach(e => e.step());
+  getObj('sword', -1).forEach(e => e.step());
+  room.draw();
+  getObj('player', -1).forEach(e => room.drawImageRotate(room.sprites[5].src, e.x + e.w/2, e.y + e.h/2, e.w, -15, e.arAng));
+}
+document.onkeydown = function (e) {
+  if (e.keyCode == 32) {
+    if (typeof room.timer == 'undefined') {room.timer = setInterval(room.step, 17); }
+    else {
+      var p = getObj`player`;
+      if (p.spr == 1) {room.shoot(p); }
+      else if (!p.vspd) {
+        getObj('block', -1).concat(getObj`ground`).forEach(function (e) {
+          if (e.y == p.y+p.h && p.x > e.x-p.w/2 && p.x+p.w/2 < e.x+e.w) {p.vspd = -18; }
+        });
+      }
+    }
+  }
+  if (e.keyCode == 38) {
+    if (typeof room.timer == 'undefined') {room.timer = setInterval(room.step, 17); }
+    else {
+      var p = getObj('player',1);
+      if (p.spr == 3) {room.shoot(p); }
+      else if (!p.vspd) {
+        getObj('block', -1).concat(getObj`ground`).forEach(function (e) {
+          if (e.y == p.y+p.h && p.x > e.x-p.w/2 && p.x+p.w/2 < e.x+e.w) {p.vspd = -18; }
+        });
+      }
+    }
+  }
+}
+</script>
+</body>
+</html>
